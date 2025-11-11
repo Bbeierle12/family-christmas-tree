@@ -1,0 +1,17 @@
+/* React Flow base styles */
+@import 'reactflow/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: tweak the background dot gap via CSS custom prop */
+:root { --rfbg-gap: 18px; }
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
