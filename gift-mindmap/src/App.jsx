@@ -1,10 +1,6 @@
 import React from 'react'
-import GiftMindMap from '@/components/GiftMindMap.tsx'
+import GiftMindMap from './components/GiftMindMap-standalone.jsx'
 
 export default function App() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <GiftMindMap />
-    </div>
-  )
+  return <GiftMindMap />
 }

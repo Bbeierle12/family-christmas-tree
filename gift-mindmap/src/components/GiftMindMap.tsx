@@ -12,6 +12,11 @@ import { Slider } from "@/components/ui/slider";
 import { Upload, Download, Plus, CheckCircle2, Pencil, Trash2, RefreshCcw, UserPlus, Send, MessageSquare, ChevronDown, ChevronUp, Users, Lock, Eye, EyeOff } from "lucide-react";
 import { useGiftStore } from "@/store/giftStore";
 import { parseExportJSON } from "@/lib/schema";
+import { colorForProfile } from "@/lib/colors";
+import GraphCanvas from '@/features/canvas/GraphCanvas'
+import ChatPanel from '@/features/panels/ChatPanel'
+import SideTabs from '@/features/panels/SideTabs'
+import TopBar from '@/features/panels/TopBar'
 
 /*****************
  * Helper utils  *
@@ -38,11 +43,6 @@ function hashString(s: string) {
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
-function colorForProfile(id?: string) {
-  if (!id) return undefined;
-  const idx = hashString(id) % PROFILE_COLORS.length;
-  return PROFILE_COLORS[idx];
-}
 
 // Family seed (kept for tests; UI visibility now filtered by profile)
 const family = [
@@ -56,11 +56,9 @@ const family = [
   "Maggy",
 ];
 
-/************************
+/**********************
  * Custom node components
  ************************/
-import GraphCanvas from '@/features/canvas/GraphCanvas'
-
 const nodeTypes = undefined as any;
 
 /**********************
@@ -108,6 +106,9 @@ function saveCurrentProfile(id: string) { localStorage.setItem(LS_PROFILE, id); 
  *******************/
 export default function GiftMindMap() {
   const { nodes: seedNodes, edges: seedEdges } = useMemo(buildSeedGraph, []);
+  
+  // ReactFlow ref
+  const rfRef = useRef<any>(null);
 
   // Graph state now provided by the store
   const nodes = useGiftStore((s) => s.nodes);
@@ -218,6 +219,13 @@ export default function GiftMindMap() {
   }, [selectedNode]);
 
   // ---- Graph mutations ----
+  // Store actions
+  const addIdeaStore = useGiftStore((s) => s.addIdea);
+  const updateIdeaStore = useGiftStore((s) => s.updateIdea);
+  const updatePersonStore = useGiftStore((s) => s.updatePerson);
+  const deleteNodeStore = useGiftStore((s) => s.deleteNode);
+  const addPersonStore = useGiftStore((s) => s.addPerson);
+
   const onConnect = useCallback((params: any) => onConnectStore(params), [onConnectStore]);
 
   const addIdeaTo = useCallback((personId: string, idea: any) => {
@@ -278,7 +286,7 @@ const exportJSON = useCallback(() => {
       };
       reader.readAsText(file);
     },
-    [setNodes, setEdges]
+    [importState, selectNodeStore]
   );
 
   // Profiles helpers
@@ -523,17 +531,3 @@ const exportJSON = useCallback(() => {
     </TooltipProvider>
   );
 }
-
-//
-
-
-
-
-
-
-
-
-
-import ChatPanel from '@/features/panels/ChatPanel'
-import SideTabs from '@/features/panels/SideTabs'
-
