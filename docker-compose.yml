@@ -1,0 +1,95 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: giftmap-postgres
+    environment:
+      POSTGRES_USER: giftmap
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gift_map_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U giftmap']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - giftmap
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: giftmap-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - giftmap
+
+  # API Server
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: giftmap-api
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://giftmap:password@postgres:5432/gift_map_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-change-in-prod
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+      - /app/dist
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run dev
+    networks:
+      - giftmap
+
+  # Frontend Web App
+  web:
+    build:
+      context: ./gift-mindmap
+      dockerfile: Dockerfile.dev
+    container_name: giftmap-web
+    ports:
+      - '5173:5173'
+    environment:
+      VITE_API_URL: http://localhost:3000/api/v1
+      VITE_WS_URL: http://localhost:3000
+    volumes:
+      - ./gift-mindmap:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - giftmap
+    depends_on:
+      - api
+
+networks:
+  giftmap:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
