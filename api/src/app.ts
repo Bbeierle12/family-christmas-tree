@@ -81,17 +81,17 @@ app.get('/health', async (req, res) => {
 // API ROUTES
 // ============================================================================
 
-// Import routes (will create these next)
-// import authRoutes from './modules/auth/auth.routes';
+// Import routes
+import authRoutes from './modules/auth/auth.routes';
 // import workspaceRoutes from './modules/workspaces/workspaces.routes';
 // import giftMapRoutes from './modules/gift-maps/gift-maps.routes';
 
 // Mount routes
-// app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 // app.use('/api/v1/workspaces', workspaceRoutes);
 // app.use('/api/v1/gift-maps', giftMapRoutes);
 
-// Placeholder routes until we create the modules
+// API root endpoint
 app.get('/api/v1', (req, res) => {
   res.json({
     message: 'Gift Map API v1',
@@ -99,7 +99,8 @@ app.get('/api/v1', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/v1/auth',
-      workspaces: '/api/v1/workspaces',
+      workspaces: '/api/v1/workspaces (coming soon)',
+      giftMaps: '/api/v1/gift-maps (coming soon)',
     },
   });
 });
