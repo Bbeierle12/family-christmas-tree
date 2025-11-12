@@ -53,8 +53,28 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     set({ isProcessing: true, error: null });
     
     try {
+      // Load model configuration from localStorage
+      const provider = localStorage.getItem("ai_provider") || "openai";
+      const model = localStorage.getItem("ai_model") || "gpt-4o";
+      const localModelUrl = localStorage.getItem("local_model_url") || "http://localhost:11434/api/chat";
+      const localModelName = localStorage.getItem("local_model_name") || "";
+      
+      // Get the appropriate API key based on provider
+      let effectiveApiKey = apiKey;
+      if (!effectiveApiKey) {
+        if (provider === "openai") {
+          effectiveApiKey = localStorage.getItem("openai_api_key") || undefined;
+        } else if (provider === "anthropic") {
+          effectiveApiKey = localStorage.getItem("anthropic_api_key") || undefined;
+        }
+      }
+      
       const executor = new AgentExecutor(VIBE_CODER_WORKFLOW, {
-        apiKey,
+        apiKey: effectiveApiKey,
+        model,
+        provider,
+        localModelUrl,
+        localModelName,
         onProgress: (state: WorkflowState) => {
           set({ workflowState: state });
         },

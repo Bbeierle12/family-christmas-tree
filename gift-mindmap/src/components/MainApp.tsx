@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code2, Network, Sparkles } from "lucide-react";
+import { Code2, Network, Settings } from "lucide-react";
 import LiveCodingApp from "./LiveCodingApp";
-import { VibeCodingApp } from "./VibeCodingApp";
 import GiftMindMap from "./GiftMindMap-standalone";
+import { SettingsPanel } from "./SettingsPanel";
 
 export default function MainApp() {
-  const [activeTab, setActiveTab] = useState<"code" | "vibe" | "canvas">("vibe");
+  const [activeTab, setActiveTab] = useState<"code" | "canvas" | "settings">("code");
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -15,12 +15,8 @@ export default function MainApp() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-800">Creative Workspace</h1>
 
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "code" | "vibe" | "canvas")}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "code" | "canvas" | "settings")}>
             <TabsList className="bg-muted">
-              <TabsTrigger value="vibe" className="gap-2">
-                <Sparkles className="w-4 h-4" />
-                Vibe Coder (AI)
-              </TabsTrigger>
               <TabsTrigger value="code" className="gap-2">
                 <Code2 className="w-4 h-4" />
                 Live Code Editor
@@ -29,6 +25,10 @@ export default function MainApp() {
                 <Network className="w-4 h-4" />
                 Gift Mind Map
               </TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -36,9 +36,9 @@ export default function MainApp() {
 
       {/* Content Area */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === "vibe" && <VibeCodingApp />}
         {activeTab === "code" && <LiveCodingApp />}
         {activeTab === "canvas" && <GiftMindMap />}
+        {activeTab === "settings" && <SettingsPanel />}
       </div>
     </div>
   );

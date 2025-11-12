@@ -23,6 +23,10 @@ function findLast<T>(arr: T[], predicate: (item: T) => boolean): T | undefined {
 
 interface AgentExecutorOptions {
   apiKey?: string;
+  model?: string; // Model name (e.g., "gpt-4o", "claude-3-5-sonnet-20241022", "llama3.2")
+  provider?: string; // Provider type: "openai", "anthropic", "local"
+  localModelUrl?: string; // URL for local model endpoint
+  localModelName?: string; // Name of local model
   onProgress?: (state: WorkflowState) => void;
   onMessage?: (message: AgentMessage) => void;
 }
@@ -250,7 +254,8 @@ export class AgentExecutor {
       return;
     }
     
-    // Call OpenAI with function calling
+    const provider = this.options.provider || "openai";
+    const model = this.options.model || node.model || "gpt-4o-mini";
     const apiKey = this.options.apiKey;
     
     const messages = [
@@ -258,26 +263,91 @@ export class AgentExecutor {
       { role: "user", content: context || "Execute this step" },
     ];
     
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: node.model || "gpt-4o-mini",
-        messages,
-        tools: TOOL_SCHEMAS.map((t) => ({ type: "function", function: t })),
-        tool_choice: "auto",
-      }),
-    });
+    let response: Response;
+    
+    if (provider === "openai") {
+      // OpenAI API
+      response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          tools: TOOL_SCHEMAS.map((t) => ({ type: "function", function: t })),
+          tool_choice: "auto",
+        }),
+      });
+    } else if (provider === "anthropic") {
+      // Anthropic Claude API
+      response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 4096,
+          system: node.instructions || "",
+          messages: [{ role: "user", content: context || "Execute this step" }],
+          tools: TOOL_SCHEMAS.map((t) => ({
+            name: t.name,
+            description: t.description,
+            input_schema: t.parameters,
+          })),
+        }),
+      });
+    } else if (provider === "local") {
+      // Local model (Ollama/LM Studio with OpenAI-compatible API)
+      const localUrl = this.options.localModelUrl || "http://localhost:11434/api/chat";
+      const localModel = this.options.localModelName || model;
+      
+      response = await fetch(localUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: localModel,
+          messages,
+          tools: TOOL_SCHEMAS.map((t) => ({ type: "function", function: t })),
+          stream: false,
+        }),
+      });
+    } else {
+      throw new Error(`Unsupported provider: ${provider}`);
+    }
     
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+      throw new Error(`API error: ${response.statusText}`);
     }
     
     const data = await response.json();
-    const message = data.choices[0]?.message;
+    
+    // Parse response based on provider
+    let message: any;
+    if (provider === "openai" || provider === "local") {
+      message = data.choices?.[0]?.message;
+    } else if (provider === "anthropic") {
+      // Anthropic response format
+      message = {
+        content: data.content?.[0]?.text || "",
+        tool_calls: data.content
+          ?.filter((c: any) => c.type === "tool_use")
+          .map((c: any) => ({
+            id: c.id,
+            type: "function",
+            function: {
+              name: c.name,
+              arguments: JSON.stringify(c.input),
+            },
+          })),
+      };
+    }
     
     if (message?.content) {
       this.addMessage({
@@ -289,7 +359,7 @@ export class AgentExecutor {
     }
     
     // Handle tool calls if any
-    if (message?.tool_calls) {
+    if (message?.tool_calls && message.tool_calls.length > 0) {
       const toolResults: ToolCallResult[] = [];
       
       for (const toolCall of message.tool_calls) {
