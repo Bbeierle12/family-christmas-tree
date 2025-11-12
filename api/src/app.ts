@@ -87,6 +87,7 @@ import workspaceRoutes from './modules/workspaces/workspaces.routes';
 import giftMapRoutes from './modules/gift-maps/gift-maps.routes';
 import peopleRoutes from './modules/people/people.routes';
 import giftIdeasRoutes from './modules/gift-ideas/gift-ideas.routes';
+import edgesRoutes from './modules/edges/edges.routes';
 
 // Mount routes
 app.use('/api/v1/auth', authRoutes);
@@ -94,6 +95,7 @@ app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/v1', giftMapRoutes); // Mounted at /api/v1 for both /workspaces/:id/gift-maps and /gift-maps/:id
 app.use('/api/v1', peopleRoutes); // Mounted at /api/v1 for both /gift-maps/:id/people and /people/:id
 app.use('/api/v1', giftIdeasRoutes); // Mounted at /api/v1 for both /people/:id/gift-ideas and /gift-ideas/:id
+app.use('/api/v1', edgesRoutes); // Mounted at /api/v1 for both /gift-maps/:id/edges and /edges/:id
 
 // API root endpoint
 app.get('/api/v1', (req, res) => {
@@ -107,10 +109,11 @@ app.get('/api/v1', (req, res) => {
       giftMaps: '/api/v1/gift-maps',
       people: '/api/v1/people',
       giftIdeas: '/api/v1/gift-ideas',
+      edges: '/api/v1/edges',
     },
     stats: {
-      totalEndpoints: '40+',
-      modules: ['auth', 'workspaces', 'gift-maps', 'people', 'gift-ideas'],
+      totalEndpoints: '45+',
+      modules: ['auth', 'workspaces', 'gift-maps', 'people', 'gift-ideas', 'edges'],
     },
   });
 });
