@@ -105,13 +105,14 @@ export function AgentChat() {
           <div className="mb-2 p-2 bg-muted/50 rounded">
             <Input
               type="password"
-              placeholder="OpenAI API Key (optional - uses mock mode without)"
+              placeholder="OpenAI API Key (required for real AI assistance)"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="text-xs h-8"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Leave empty to use mock mode for development
+              Without an API key, responses will be simulated placeholders.
+              Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">platform.openai.com</a>
             </p>
           </div>
         )}

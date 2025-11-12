@@ -239,17 +239,25 @@ export class AgentExecutor {
   private async executeAgentNode(node: WorkflowNode, context: string | null): Promise<void> {
     if (!this.options.apiKey) {
       // Mock mode for development (no API key provided)
+      // Generate a context-aware mock response
+      const userRequest = context || "the user's request";
+      
+      let mockResponse = "";
+      if (node.id === "classify") {
+        mockResponse = `[${node.label}] Analyzing: "${userRequest}"\n\n✅ Classification: UI_SAFE\n📋 Plan:\n1. Search for relevant component files\n2. Generate minimal diff for the changes\n3. Run automated checks (linter, typecheck, tests)\n4. Preview the changes\n\n⚠️ Mock Mode: Using simulated responses. Add an API key in settings for real AI assistance.`;
+        this.state.variables.scope = "UI_SAFE";
+      } else if (node.id === "reflect") {
+        mockResponse = `[${node.label}] Reviewing failures and proposing corrections...\n\n⚠️ Mock Mode: Cannot generate real repairs without API key.`;
+      } else {
+        mockResponse = `[${node.label}] Processing: "${userRequest}"\n\n⚠️ Mock Mode: Add API key for AI-powered assistance.`;
+      }
+      
       this.addMessage({
         id: `msg_${Date.now()}`,
         role: "assistant",
-        text: `[${node.label}] Classified as UI_SAFE. Plan: 1) Search for PersonNode, 2) Generate diff for border change, 3) Run checks.`,
+        text: mockResponse,
         timestamp: Date.now(),
       });
-      
-      // Update scope if this is the classify node
-      if (node.id === "classify") {
-        this.state.variables.scope = "UI_SAFE";
-      }
       
       return;
     }

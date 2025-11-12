@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCcw, Maximize2, AlertCircle, Zap, ZapOff } from "lucide-react";
@@ -180,7 +179,7 @@ export function LivePreview({ html, css, javascript }: LivePreviewProps) {
   };
 
   return (
-    <Card className="h-full overflow-hidden flex flex-col border-0 rounded-none">
+    <div className="h-full overflow-hidden flex flex-col">
       {/* Preview Controls */}
       <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
         <div className="flex items-center gap-2">
@@ -260,6 +259,6 @@ export function LivePreview({ html, css, javascript }: LivePreviewProps) {
           ))}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

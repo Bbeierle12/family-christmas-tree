@@ -40,7 +40,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     {
       id: `msg_${Date.now()}`,
       role: "system",
-      text: "🎄 Vibe Coding Mode Active! I can modify the app live. Try: 'make the person cards have blue borders' or 'add a snow animation'",
+      text: "🎄 Vibe Coding Mode Active!\n\n⚠️ Running in MOCK MODE - Add an API key in Settings Panel for real AI assistance.\n\nIn mock mode, I'll simulate responses but won't make actual code changes.\n\nTry: 'make the person cards have blue borders' or 'add a snow animation'",
       timestamp: Date.now(),
     },
   ],

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Download, Upload, RefreshCcw, Code2, FileCode, Maximize2, Minimize2 } from "lucide-react";
+import { Download, Upload, RefreshCcw, Code2, FileCode, Maximize2, Minimize2, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { CodeEditor } from "@/features/editor/CodeEditor";
 import { LivePreview } from "@/features/preview/LivePreview";
 import { ChatPanel } from "@/features/panels/ChatPanel";
@@ -24,6 +24,7 @@ export default function LiveCodingApp() {
 
   const [isEditorCollapsed, setIsEditorCollapsed] = useState(false);
   const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
 
   const handleCodeChange = (value: string) => {
     if (selectedLanguage === "html") setHtml(value);
@@ -122,7 +123,7 @@ ${javascript}
   return (
     <TooltipProvider>
       <div className="w-full h-full flex flex-col bg-gradient-to-br from-emerald-50 to-sky-50" onDrop={onDrop} onDragOver={onDragOver}>
-        {/* Top Bar */}
+        {/* Top Bar - Full Width */}
         <div className="px-4 py-2 border-b bg-white/80 backdrop-blur">
           <div className="flex items-center justify-between">
             <div className="hidden md:block text-sm text-muted-foreground">
@@ -170,62 +171,123 @@ ${javascript}
           </div>
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content Area with AI Chat and Editor/Preview Side by Side */}
         <div className="flex-1 flex gap-4 p-4 min-h-0 overflow-hidden">
-          {/* Code Editor Panel */}
-          {!isEditorCollapsed && (
-            <div className="flex-1 flex flex-col min-w-0">
-              <Card className="flex-1 overflow-hidden flex flex-col">
-                <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
-                  <Tabs value={selectedLanguage} onValueChange={(v) => setSelectedLanguage(v as Language)}>
-                    <TabsList>
-                      <TabsTrigger value="html">HTML</TabsTrigger>
-                      <TabsTrigger value="css">CSS</TabsTrigger>
-                      <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-
-                  <Button size="sm" variant="ghost" onClick={() => setIsEditorCollapsed(true)}>
-                    <Minimize2 className="w-4 h-4 mr-1" /> Collapse
-                  </Button>
+          {/* Left AI Chat Panel - Extended height */}
+          {!isChatCollapsed ? (
+            <Card className="w-96 overflow-hidden flex flex-col h-full">
+              <div className="px-3 py-2 border-b bg-muted/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="text-sm font-medium">AI Assistant</span>
                 </div>
-
-                <div className="flex-1 min-h-0">
-                  <CodeEditor
-                    value={getCurrentCode()}
-                    onChange={handleCodeChange}
-                    language={selectedLanguage}
-                  />
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* Editor Collapsed State */}
-          {isEditorCollapsed && (
-            <Card className="w-12 flex items-center justify-center cursor-pointer hover:bg-muted/50" onClick={() => setIsEditorCollapsed(false)}>
-              <Maximize2 className="w-5 h-5 text-muted-foreground" />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsChatCollapsed(true)}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <ChatPanel onCodeGenerated={handleCodeGenerated} />
+              </div>
+            </Card>
+          ) : (
+            <Card className="w-12 h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50" onClick={() => setIsChatCollapsed(false)}>
+              <ChevronRight className="w-4 h-4" />
+              <div className="mt-2 -rotate-90 whitespace-nowrap text-xs text-muted-foreground">
+                AI Chat
+              </div>
             </Card>
           )}
 
-          {/* Live Preview Panel */}
-          {!isPreviewCollapsed && (
-            <div className="flex-1 flex flex-col min-w-0">
-              <LivePreview html={html} css={css} javascript={javascript} />
+          {/* Main Editor and Preview Card */}
+          <Card className="flex-1 overflow-hidden flex flex-col">
+            {/* Unified Header */}
+            <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
+              <div className="flex items-center gap-4">
+                <div className="text-sm font-medium">Code Editor & Live Preview</div>
+                <Tabs value={selectedLanguage} onValueChange={(v) => setSelectedLanguage(v as Language)}>
+                  <TabsList className="h-8">
+                    <TabsTrigger value="html" className="text-xs">HTML</TabsTrigger>
+                    <TabsTrigger value="css" className="text-xs">CSS</TabsTrigger>
+                    <TabsTrigger value="javascript" className="text-xs">JavaScript</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditorCollapsed(!isEditorCollapsed)}
+                  className="text-xs"
+                >
+                  {isEditorCollapsed ? (
+                    <>
+                      <Maximize2 className="w-4 h-4 mr-1" /> Show Editor
+                    </>
+                  ) : (
+                    <>
+                      <Minimize2 className="w-4 h-4 mr-1" /> Hide Editor
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+                  className="text-xs"
+                >
+                  {isPreviewCollapsed ? (
+                    <>
+                      <Maximize2 className="w-4 h-4 mr-1" /> Show Preview
+                    </>
+                  ) : (
+                    <>
+                      <Minimize2 className="w-4 h-4 mr-1" /> Hide Preview
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          )}
 
-          {/* Preview Collapsed State */}
-          {isPreviewCollapsed && (
-            <Card className="w-12 flex items-center justify-center cursor-pointer hover:bg-muted/50" onClick={() => setIsPreviewCollapsed(false)}>
-              <Maximize2 className="w-5 h-5 text-muted-foreground" />
-            </Card>
-          )}
-        </div>
+            {/* Split View Container */}
+            <div className="flex-1 flex min-h-0 overflow-hidden">
+              {/* Code Editor Section */}
+              {!isEditorCollapsed && (
+                <div className={`${!isPreviewCollapsed ? 'w-1/2' : 'flex-1'} border-r min-h-0 flex flex-col`}>
+                  <div className="flex-1 min-h-0">
+                    <CodeEditor
+                      value={getCurrentCode()}
+                      onChange={handleCodeChange}
+                      language={selectedLanguage}
+                    />
+                  </div>
+                </div>
+              )}
 
-        {/* Bottom AI Chat */}
-        <div className="px-4 pb-4">
-          <ChatPanel onCodeGenerated={handleCodeGenerated} />
+              {/* Live Preview Section */}
+              {!isPreviewCollapsed && (
+                <div className={`${!isEditorCollapsed ? 'w-1/2' : 'flex-1'} min-h-0`}>
+                  <LivePreview html={html} css={css} javascript={javascript} />
+                </div>
+              )}
+
+              {/* Full Collapse State */}
+              {isEditorCollapsed && isPreviewCollapsed && (
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Code2 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Both panels are collapsed</p>
+                    <p className="text-xs mt-1">Use the buttons above to show editor or preview</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
     </TooltipProvider>
