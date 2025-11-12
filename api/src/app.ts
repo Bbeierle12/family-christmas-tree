@@ -83,12 +83,12 @@ app.get('/health', async (req, res) => {
 
 // Import routes
 import authRoutes from './modules/auth/auth.routes';
-// import workspaceRoutes from './modules/workspaces/workspaces.routes';
+import workspaceRoutes from './modules/workspaces/workspaces.routes';
 // import giftMapRoutes from './modules/gift-maps/gift-maps.routes';
 
 // Mount routes
 app.use('/api/v1/auth', authRoutes);
-// app.use('/api/v1/workspaces', workspaceRoutes);
+app.use('/api/v1/workspaces', workspaceRoutes);
 // app.use('/api/v1/gift-maps', giftMapRoutes);
 
 // API root endpoint
@@ -99,8 +99,10 @@ app.get('/api/v1', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/v1/auth',
-      workspaces: '/api/v1/workspaces (coming soon)',
+      workspaces: '/api/v1/workspaces',
       giftMaps: '/api/v1/gift-maps (coming soon)',
+      people: '/api/v1/people (coming soon)',
+      giftIdeas: '/api/v1/gift-ideas (coming soon)',
     },
   });
 });
