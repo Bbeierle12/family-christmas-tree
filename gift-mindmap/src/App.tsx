@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { LoginPage } from '@/pages/LoginPage';
 import { WorkspaceSelector } from '@/pages/WorkspaceSelector';
-import GiftMindMap from '@/components/GiftMindMap.tsx';
+import GiftMapCanvas from '@/components/GiftMapCanvas';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,16 +49,13 @@ function AppContent() {
       <div className="flex items-center justify-between px-4 py-2 bg-white border-b">
         <button
           onClick={() => setSelectedWorkspace(null)}
-          className="text-sm text-blue-600 hover:text-blue-700"
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
         >
           ← Back to Workspaces
         </button>
         <div className="text-sm text-gray-600">{user.displayName}</div>
       </div>
-      <GiftMindMap
-        workspaceId={selectedWorkspace.workspaceId}
-        giftMapId={selectedWorkspace.giftMapId}
-      />
+      <GiftMapCanvas giftMapId={selectedWorkspace.giftMapId} />
     </div>
   );
 }
