@@ -237,7 +237,13 @@ export class AgentExecutor {
   }
 
   private async executeAgentNode(node: WorkflowNode, context: string | null): Promise<void> {
-    if (!this.options.apiKey) {
+    // Debug logging
+    console.log('[AgentExecutor] Provider:', this.options.provider);
+    console.log('[AgentExecutor] Has API Key:', !!this.options.apiKey);
+    console.log('[AgentExecutor] Model:', this.options.model);
+
+    // Check if we should enter mock mode (no API key for cloud providers)
+    if (!this.options.apiKey && this.options.provider !== "local") {
       // Mock mode for development (no API key provided)
       // Generate a context-aware mock response
       const userRequest = context || "the user's request";
@@ -275,6 +281,9 @@ export class AgentExecutor {
     
     if (provider === "openai") {
       // OpenAI API
+      if (!apiKey) {
+        throw new Error("API key is required for OpenAI provider");
+      }
       response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -290,6 +299,9 @@ export class AgentExecutor {
       });
     } else if (provider === "anthropic") {
       // Anthropic Claude API
+      if (!apiKey) {
+        throw new Error("API key is required for Anthropic provider");
+      }
       response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -313,7 +325,10 @@ export class AgentExecutor {
       // Local model (Ollama/LM Studio with OpenAI-compatible API)
       const localUrl = this.options.localModelUrl || "http://localhost:11434/api/chat";
       const localModel = this.options.localModelName || model;
-      
+
+      console.log('[AgentExecutor] Local model URL:', localUrl);
+      console.log('[AgentExecutor] Local model name:', localModel);
+
       response = await fetch(localUrl, {
         method: "POST",
         headers: {
@@ -322,7 +337,8 @@ export class AgentExecutor {
         body: JSON.stringify({
           model: localModel,
           messages,
-          tools: TOOL_SCHEMAS.map((t) => ({ type: "function", function: t })),
+          // Note: Most local models don't support tools/function calling yet
+          // tools: TOOL_SCHEMAS.map((t) => ({ type: "function", function: t })),
           stream: false,
         }),
       });

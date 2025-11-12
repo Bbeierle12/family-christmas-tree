@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug LocalStorage</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .item { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .key { font-weight: bold; color: blue; }
+        .value { color: green; }
+    </style>
+</head>
+<body>
+    <h1>LocalStorage Debug</h1>
+    <button onclick="location.reload()">Refresh</button>
+    <button onclick="clearLocal()">Clear All</button>
+    <button onclick="setLocal()">Set Local Model</button>
+    <div id="content"></div>
+
+    <script>
+        function displayStorage() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+
+            const keys = ['ai_provider', 'ai_model', 'local_model_url', 'local_model_name', 'openai_api_key', 'anthropic_api_key'];
+
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<span class="key">${key}:</span> <span class="value">${value || '(not set)'}</span>`;
+                content.appendChild(div);
+            });
+        }
+
+        function clearLocal() {
+            if (confirm('Clear all localStorage?')) {
+                localStorage.clear();
+                displayStorage();
+            }
+        }
+
+        function setLocal() {
+            localStorage.setItem('ai_provider', 'local');
+            localStorage.setItem('ai_model', 'qwen2.5-coder:14b');
+            localStorage.setItem('local_model_url', 'http://localhost:11434/api/chat');
+            localStorage.setItem('local_model_name', 'qwen2.5-coder:14b');
+            alert('Local model configuration set!');
+            displayStorage();
+        }
+
+        // Display on load
+        displayStorage();
+    </script>
+</body>
+</html>
