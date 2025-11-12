@@ -1,6 +1,6 @@
 import React from 'react'
-import GiftMindMap from './components/GiftMindMap-standalone.jsx'
+import MainApp from './components/MainApp.tsx'
 
 export default function App() {
-  return <GiftMindMap />
+  return <MainApp />
 }

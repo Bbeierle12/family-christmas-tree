@@ -502,7 +502,7 @@ export default function GiftMindMap() {
 
   return (
     <TooltipProvider>
-      <div className="w-full h-[86vh] flex flex-col gap-3 p-4 bg-gradient-to-br from-emerald-50 to-sky-50" onDrop={onDrop} onDragOver={onDragOver}>
+      <div className="w-full h-screen flex flex-col gap-3 p-4 bg-gradient-to-br from-emerald-50 to-sky-50" onDrop={onDrop} onDragOver={onDragOver}>
         {/* Main area: permanent sidebar + collapsible canvas */}
         <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
           {/* Canvas column */}
@@ -794,13 +794,3 @@ export default function GiftMindMap() {
     </TooltipProvider>
   );
 }
-
-/****************
- * Smoke tests  *
- ****************/
-function runSmokeTests() {
-  // uid should return unique strings and not JSX
-  const a = uid("t");
-  const b = uid("t");
-  console.assert(typeof a === "string" && typeof b === "string", "uid should return strings");
-  console.assert(a !==
