@@ -47,7 +47,8 @@ export function AgentChat() {
     if (!text || isProcessing) return;
 
     setInput("");
-    await startWorkflow(text, apiKey || undefined);
+    // Only pass apiKey if it's not empty
+    await startWorkflow(text, apiKey.trim() ? apiKey.trim() : undefined);
   };
 
   const getStatusIcon = (status?: "pending" | "success" | "error") => {

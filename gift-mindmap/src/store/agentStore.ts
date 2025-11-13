@@ -40,7 +40,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     {
       id: `msg_${Date.now()}`,
       role: "system",
-      text: "🎄 Vibe Coding Mode Active!\n\n⚠️ Running in MOCK MODE - Add an API key in Settings Panel for real AI assistance.\n\nIn mock mode, I'll simulate responses but won't make actual code changes.\n\nTry: 'make the person cards have blue borders' or 'add a snow animation'",
+      text: "🎄 Vibe Coding Mode Active!\n\nReady to help you modify the gift mindmap app. Try: 'make the person cards have blue borders' or 'add a snow animation'",
       timestamp: Date.now(),
     },
   ],
@@ -51,14 +51,21 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   startWorkflow: async (userMessage: string, apiKey?: string) => {
     set({ isProcessing: true, error: null });
-    
+
     try {
       // Load model configuration from localStorage
       const provider = localStorage.getItem("ai_provider") || "openai";
       const model = localStorage.getItem("ai_model") || "gpt-4o";
       const localModelUrl = localStorage.getItem("local_model_url") || "http://localhost:11434/api/chat";
       const localModelName = localStorage.getItem("local_model_name") || "";
-      
+
+      // Debug logging
+      console.log('[AgentStore] Loading configuration:');
+      console.log('  Provider:', provider);
+      console.log('  Model:', model);
+      console.log('  Local URL:', localModelUrl);
+      console.log('  Local Model Name:', localModelName);
+
       // Get the appropriate API key based on provider
       let effectiveApiKey = apiKey;
       if (!effectiveApiKey) {
@@ -67,7 +74,10 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         } else if (provider === "anthropic") {
           effectiveApiKey = localStorage.getItem("anthropic_api_key") || undefined;
         }
+        // Note: Local provider doesn't need an API key
       }
+
+      console.log('  Effective API Key:', effectiveApiKey ? '(set)' : '(not set)');
       
       const executor = new AgentExecutor(VIBE_CODER_WORKFLOW, {
         apiKey: effectiveApiKey,
@@ -121,7 +131,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         {
           id: `msg_${Date.now()}`,
           role: "system",
-          text: "🎄 Vibe Coding Mode Active! I can modify the app live.",
+          text: "🎄 Vibe Coding Mode Active!\n\nReady to help you modify the gift mindmap app.",
           timestamp: Date.now(),
         },
       ],

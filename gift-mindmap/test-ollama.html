@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Ollama Connection</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        button { padding: 10px; margin: 5px; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Ollama Connection Test</h1>
+    <button onclick="testOllama()">Test Ollama API</button>
+    <button onclick="testLocalSettings()">Check Local Settings</button>
+    <div id="results"></div>
+
+    <script>
+        async function testOllama() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing Ollama connection...</p>';
+
+            try {
+                const response = await fetch('http://localhost:11434/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'qwen2.5-coder:14b',
+                        messages: [
+                            { role: 'system', content: 'You are a helpful assistant.' },
+                            { role: 'user', content: 'Say "Hello, Ollama is working!" in exactly those words.' }
+                        ],
+                        stream: false
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    results.innerHTML = `
+                        <p class="success">✓ Ollama is working!</p>
+                        <p>Response:</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    results.innerHTML = `<p class="error">✗ Error: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<p class="error">✗ Connection failed: ${error.message}</p>`;
+            }
+        }
+
+        function testLocalSettings() {
+            const results = document.getElementById('results');
+            const provider = localStorage.getItem('ai_provider');
+            const model = localStorage.getItem('ai_model');
+            const url = localStorage.getItem('local_model_url');
+            const name = localStorage.getItem('local_model_name');
+
+            results.innerHTML = `
+                <h3>Current Settings:</h3>
+                <p><strong>Provider:</strong> ${provider || '(not set)'} ${provider === 'local' ? '✓' : '✗'}</p>
+                <p><strong>Model:</strong> ${model || '(not set)'}</p>
+                <p><strong>Local URL:</strong> ${url || '(not set)'}</p>
+                <p><strong>Local Name:</strong> ${name || '(not set)'}</p>
+
+                ${provider !== 'local' ? '<p class="error">⚠️ Provider must be set to "local"</p>' : '<p class="success">✓ Provider is correctly set to local</p>'}
+            `;
+        }
+    </script>
+</body>
+</html>
